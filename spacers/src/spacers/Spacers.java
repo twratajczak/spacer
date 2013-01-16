@@ -5,6 +5,7 @@
 package spacers;
 
 import com.jme3.network.AbstractMessage;
+import com.jme3.network.ConnectionListener;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
@@ -13,6 +14,10 @@ import com.jme3.network.Server;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.network.serializing.Serializer;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
 
 /**
  *
@@ -23,29 +28,53 @@ public class Spacers {
     // be in shared constants or something.
 
     public static final String NAME = "Test Chat Server";
+    public static final String HOST = "localhost";
     public static final int VERSION = 1;
-    public static final int PORT = 5110;
-    public static final int UDP_PORT = 5110;
+    public static final int PORT = 8452;
+    public static final int UDP_PORT = 8452;
 
     public static void initializeClasses() {
         // Doing it here means that the client code only needs to
         // call our initialize.
         Serializer.registerClass(ChatMessage.class);
+        Serializer.registerClass(Mob.MobMessage.class);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         initializeClasses();
 
         // Use this to test the client/server name version check
-        Server server = Network.createServer(NAME, VERSION, PORT, UDP_PORT);
+        final Server server = Network.createServer(NAME, VERSION, PORT, UDP_PORT);
         server.start();
 
-        ChatHandler handler = new ChatHandler();
-        server.addMessageListener(handler, ChatMessage.class);
+        server.addMessageListener(new ChatHandler(), ChatMessage.class);
+        server.addConnectionListener(new ConHandler());
 
-        // Keep running basically forever
-        synchronized (NAME) {
-            NAME.wait();
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                ServerMob.tick();
+            }
+        }, 0, 1000 / 12);
+
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                 server.broadcast(ServerMob.toMessage());
+            }
+        }, 0, 50);
+    }
+    private static Map<Integer, Mob> owners = new TreeMap<Integer, Mob>();
+
+    private static class ConHandler implements ConnectionListener {
+
+        @Override
+        public void connectionAdded(Server server, HostedConnection conn) {
+            owners.put(conn.getId(), ServerMob.create());
+        }
+
+        @Override
+        public void connectionRemoved(Server server, HostedConnection conn) {
         }
     }
 
