@@ -3,12 +3,14 @@ package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.renderer.RenderManager;
 import java.io.IOException;
+import mygame.message.MessagePlayerSpeed;
 import spacers.MessageWelcome;
 import spacers.Mob;
 import spacers.Spacers;
@@ -45,17 +47,22 @@ public class Main extends SimpleApplication {
             }
         };
 
-
-
         client.start();
     }
 
     @Override
     public void simpleUpdate(float tpf) {
+        
+        Vector3f speed = new Vector3f(0,0,0.2f);
+        client.send(new MessagePlayerSpeed(speed)); 
+        
         //TODO: add update code
         for (ClientMob c : ClientMob.mobs) {
             c.geometry.setLocalTranslation(c.position.add(c.speed.mult(tpf)));
         }
+        
+        
+        
     }
 
     @Override
