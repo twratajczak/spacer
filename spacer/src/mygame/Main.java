@@ -57,6 +57,8 @@ public class Main extends SimpleApplication {
         
         Vector3f speed = new Vector3f(0,0,0.2f);
         client.send(new MessagePlayerSpeed(speed));
+        getCamera().setLocation(me.position.add(new Vector3f(0,0,-10f)));
+        getCamera().lookAt(me.position, me.position);
         
         //TODO: add update code
         for (ClientMob c : ClientMob.mobs) {
