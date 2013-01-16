@@ -3,26 +3,19 @@ package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.renderer.RenderManager;
-import com.jme3.scene.Geometry;
-import com.jme3.scene.shape.Box;
 import java.io.IOException;
+import spacers.MessageWelcome;
 import spacers.Mob;
 import spacers.Spacers;
-import spacers.Spacers.ChatMessage;
 
-/**
- * test
- *
- * @author normenhansen
- */
 public class Main extends SimpleApplication {
-
+    public static ClientMob me;
+   
     private static Client client;
 
     public static void main(String[] args) throws IOException {
@@ -34,6 +27,11 @@ public class Main extends SimpleApplication {
         client = Network.connectToServer(Spacers.NAME, Spacers.VERSION,
                 Spacers.HOST, Spacers.PORT, Spacers.UDP_PORT);
         client.addMessageListener(new ChatHandler(), Mob.MobMessage.class);
+        client.addMessageListener(new MessageListener<Client>() {
+            public void messageReceived(Client source, Message m) {
+                me = ClientMob.mobs.get(((MessageWelcome) m).mob);
+            }
+        }, MessageWelcome.class);
     }
 
     @Override
@@ -56,7 +54,7 @@ public class Main extends SimpleApplication {
     public void simpleUpdate(float tpf) {
         //TODO: add update code
         for (ClientMob c : ClientMob.mobs) {
-            c.geometry.setLocalTranslation(c.position.x, c.position.y, c.position.z);
+            c.geometry.setLocalTranslation(c.position.add(c.speed.mult(tpf)));
         }
     }
 

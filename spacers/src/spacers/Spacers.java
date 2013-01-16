@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package spacers;
 
 import com.jme3.network.AbstractMessage;
@@ -19,10 +15,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
-/**
- *
- * @author dhag
- */
 public class Spacers {
     // Normally these and the initialized method would
     // be in shared constants or something.
@@ -60,7 +52,7 @@ public class Spacers {
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                 server.broadcast(ServerMob.toMessage());
+                server.broadcast(ServerMob.toMessage());
             }
         }, 0, 50);
     }
@@ -70,7 +62,10 @@ public class Spacers {
 
         @Override
         public void connectionAdded(Server server, HostedConnection conn) {
-            owners.put(conn.getId(), ServerMob.create());
+            ServerMob m = ServerMob.create();
+            owners.put(conn.getId(), m);
+            conn.send(ServerMob.toMessage());
+            conn.send(new MessageWelcome(m.id));
         }
 
         @Override
