@@ -20,14 +20,4 @@ public class Mob {
 
 
 
-    @Serializable
-    public static class MobMessage extends AbstractMessage {
-        public int[] id;
-        public Vector3f[] position;
-        public Vector3f[] speed;
-    }
-
-
-
-
 }

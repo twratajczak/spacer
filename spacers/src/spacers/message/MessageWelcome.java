@@ -1,4 +1,4 @@
-package spacers;
+package spacers.message;
 
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
@@ -7,7 +7,10 @@ import com.jme3.network.serializing.Serializable;
 public class MessageWelcome extends AbstractMessage {
     public int mob;
 
-    MessageWelcome(int mob) {
+    public MessageWelcome() {
+    }
+
+    public MessageWelcome(int mob) {
         this.mob = mob;
     }
 }

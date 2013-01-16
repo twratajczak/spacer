@@ -1,5 +1,7 @@
 package spacers;
 
+import spacers.message.MessageMob;
+import spacers.message.MessageWelcome;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.HostedConnection;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import spacers.message.MessagePlayerSpeed;
 
 public class Spacers {
     // Normally these and the initialized method would
@@ -28,8 +31,9 @@ public class Spacers {
     public static void initializeClasses() {
         // Doing it here means that the client code only needs to
         // call our initialize.
-        Serializer.registerClass(ChatMessage.class);
-        Serializer.registerClass(Mob.MobMessage.class);
+        Serializer.registerClass(MessageWelcome.class);
+        Serializer.registerClass(MessageMob.class);
+        Serializer.registerClass(MessagePlayerSpeed.class);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -39,7 +43,15 @@ public class Spacers {
         final Server server = Network.createServer(NAME, VERSION, PORT, UDP_PORT);
         server.start();
 
-        server.addMessageListener(new ChatHandler(), ChatMessage.class);
+        server.addMessageListener(new MessageListener<HostedConnection>() {
+
+            @Override
+            public void messageReceived(HostedConnection source, Message m) {
+                MessagePlayerSpeed p = (MessagePlayerSpeed) m;
+                owners.get(source.getId()).speed = p.speed;
+            }
+
+        }, MessagePlayerSpeed.class);
         server.addConnectionListener(new ConHandler());
 
         new Timer().scheduleAtFixedRate(new TimerTask() {
@@ -55,6 +67,9 @@ public class Spacers {
                 server.broadcast(ServerMob.toMessage());
             }
         }, 0, 50);
+
+        for (int i = 0; i < 10; ++i)
+            ServerMob.create();
     }
     private static Map<Integer, Mob> owners = new TreeMap<Integer, Mob>();
 
@@ -64,8 +79,8 @@ public class Spacers {
         public void connectionAdded(Server server, HostedConnection conn) {
             ServerMob m = ServerMob.create();
             owners.put(conn.getId(), m);
-            conn.send(ServerMob.toMessage());
-            conn.send(new MessageWelcome(m.id));
+            conn.send(ServerMob.toMessage().setReliable(true));
+            conn.send(new MessageWelcome(m.id).setReliable(true));
         }
 
         @Override

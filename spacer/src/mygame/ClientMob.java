@@ -3,8 +3,10 @@ package mygame;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Box;
+import com.jme3.scene.shape.Sphere;
 import java.util.ArrayList;
 import java.util.List;
+import spacers.message.MessageMob;
 import spacers.Mob;
 
 public class ClientMob extends Mob {
@@ -20,11 +22,11 @@ public class ClientMob extends Mob {
     public ClientMob(int id) {
         super(id);
 
-        Box b = new Box(Vector3f.ZERO, 1, 1, 1);
-        geometry = new Geometry("Box", b);
+        Sphere b = new Sphere(8, 24, 0.1f);
+        geometry = new Geometry(String.format("mob %d", id), b);
     }
 
-    public static void fromMessage(Mob.MobMessage m) {
+    public static void fromMessage(MessageMob m) {
         for (int i = 0; i < m.id.length; ++i) {
             ClientMob c;
             if (mobs.size() <= m.id[i]) {

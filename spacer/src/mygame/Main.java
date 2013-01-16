@@ -10,8 +10,9 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.renderer.RenderManager;
 import java.io.IOException;
-import mygame.message.MessagePlayerSpeed;
-import spacers.MessageWelcome;
+import spacers.message.MessageMob;
+import spacers.message.MessagePlayerSpeed;
+import spacers.message.MessageWelcome;
 import spacers.Mob;
 import spacers.Spacers;
 
@@ -24,16 +25,17 @@ public class Main extends SimpleApplication {
         Spacers.initializeClasses();
 
         Main app = new Main();
-        app.start();
-
+        
         client = Network.connectToServer(Spacers.NAME, Spacers.VERSION,
                 Spacers.HOST, Spacers.PORT, Spacers.UDP_PORT);
-        client.addMessageListener(new ChatHandler(), Mob.MobMessage.class);
+        client.addMessageListener(new ChatHandler(), MessageMob.class);
         client.addMessageListener(new MessageListener<Client>() {
             public void messageReceived(Client source, Message m) {
                 me = ClientMob.mobs.get(((MessageWelcome) m).mob);
             }
         }, MessageWelcome.class);
+
+        app.start();
     }
 
     @Override
@@ -54,7 +56,7 @@ public class Main extends SimpleApplication {
     public void simpleUpdate(float tpf) {
         
         Vector3f speed = new Vector3f(0,0,0.2f);
-        client.send(new MessagePlayerSpeed(speed)); 
+        client.send(new MessagePlayerSpeed(speed));
         
         //TODO: add update code
         for (ClientMob c : ClientMob.mobs) {
@@ -73,7 +75,7 @@ public class Main extends SimpleApplication {
     private static class ChatHandler implements MessageListener<Client> {
 
         public void messageReceived(Client source, Message m) {
-            Mob.MobMessage chat = (Mob.MobMessage) m;
+            MessageMob chat = (MessageMob) m;
             ClientMob.fromMessage(chat);
         }
     }
