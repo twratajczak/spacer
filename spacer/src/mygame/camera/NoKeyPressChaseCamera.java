@@ -24,16 +24,9 @@ public class NoKeyPressChaseCamera extends ChaseCamera {
     public void onAction(String name, boolean keyPressed, float tpf) {
         if (dragToRotate) {
             if (name.equals(ChaseCamToggleRotate) && enabled) {
-                if (!keyPressed) {
-                    canRotate = true;
-                    if (hideCursorOnRotate) {
-                        inputManager.setCursorVisible(false);
-                    }
-                } else {
-                    canRotate = false;
-                    if (hideCursorOnRotate) {
-                        inputManager.setCursorVisible(true);
-                    }
+                canRotate = true;
+                if (hideCursorOnRotate) {
+                    inputManager.setCursorVisible(false);
                 }
             }
         }
