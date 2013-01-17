@@ -2,10 +2,14 @@ package spacers;
 
 import spacers.message.MessageMob;
 import com.jme3.math.Vector3f;
+import com.jme3.network.HostedConnection;
 import java.util.ArrayList;
 import java.util.List;
+import spacers.message.MessageGoal;
 
 public class ServerMob extends Mob {
+    public HostedConnection conn;
+    public ServerMob goal;
 
     public ServerMob(int id, Type type) {
         super(id);
@@ -19,10 +23,21 @@ public class ServerMob extends Mob {
         return result;
     }
 
-    public static void tick() {
-        for (Mob m : mobs) {
-            m.position = m.position.add(m.speed);
+    private void _tick() {
+        position = position.add(speed);
+
+        if (null != goal && goal.position.distance(position) < 0.1) {
+            ServerMob next = mobs.get(1 + goal.id);
+            if (Mob.Type.CHECKPOINT == next.type) {
+                goal = next;
+                conn.send(new MessageGoal(goal));
+            }
         }
+    }
+
+    public static void tick() {
+        for (ServerMob m : mobs)
+            m._tick();
     }
 
     public static MessageMob toMessage() {

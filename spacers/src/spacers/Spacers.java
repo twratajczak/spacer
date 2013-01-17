@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+import spacers.message.MessageGoal;
 import spacers.message.MessagePlayerSpeed;
 
 public class Spacers {
@@ -33,6 +34,7 @@ public class Spacers {
     public static void initializeClasses() {
         // Doing it here means that the client code only needs to
         // call our initialize.
+        Serializer.registerClass(MessageGoal.class);
         Serializer.registerClass(MessageWelcome.class);
         Serializer.registerClass(MessageMob.class);
         Serializer.registerClass(MessagePlayerSpeed.class);
@@ -69,9 +71,11 @@ public class Spacers {
             }
         }, 0, 100);
 
+        ServerMob.create(Mob.Type.CHECKPOINT);
         for (int i = 0; i < 10; ++i) {
-            ServerMob.create(Mob.Type.CHECKPOINT).position = new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random());
+            ServerMob.create(Mob.Type.CHECKPOINT).position = new Vector3f(10.f * (float) Math.random(), 10.f * (float) Math.random(), 10.f * (float) Math.random());
         }
+        ServerMob.create(Mob.Type.CHECKPOINT);
     }
     private static Map<Integer, Mob> owners = new TreeMap<Integer, Mob>();
 
@@ -80,71 +84,15 @@ public class Spacers {
         @Override
         public void connectionAdded(Server server, HostedConnection conn) {
             ServerMob m = ServerMob.create(Mob.Type.PLAYER);
+            m.conn = conn;
             owners.put(conn.getId(), m);
             conn.send(ServerMob.toMessage().setReliable(true));
             conn.send(new MessageWelcome(m.id).setReliable(true));
+            m.goal = ServerMob.mobs.get(0);
         }
 
         @Override
         public void connectionRemoved(Server server, HostedConnection conn) {
-        }
-    }
-
-    private static class ChatHandler implements MessageListener<HostedConnection> {
-
-        public ChatHandler() {
-        }
-
-        public void messageReceived(HostedConnection source, Message m) {
-            if (m instanceof ChatMessage) {
-                // Keep track of the name just in case we
-                // want to know it for some other reason later and it's
-                // a good example of session data
-                source.setAttribute("name", ((ChatMessage) m).getName());
-
-                System.out.println("Broadcasting:" + m + "  reliable:" + m.isReliable());
-
-                // Just rebroadcast... the reliable flag will stay the
-                // same so if it came in on UDP it will go out on that too
-                source.getServer().broadcast(m);
-            } else {
-                System.err.println("Received odd message:" + m);
-            }
-        }
-    }
-
-    @Serializable
-    public static class ChatMessage extends AbstractMessage {
-
-        private String name;
-        private String message;
-
-        public ChatMessage() {
-        }
-
-        public ChatMessage(String name, String message) {
-            setName(name);
-            setMessage(message);
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setMessage(String s) {
-            this.message = s;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public String toString() {
-            return name + ":" + message;
         }
     }
 }
