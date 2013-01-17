@@ -1,15 +1,14 @@
 package spacers.message;
 
-import com.jme3.math.Vector3f;
 import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
+import java.util.ArrayList;
+import spacers.Mob;
 
 
 @Serializable
 public class MessageMob extends AbstractMessage {
-    public int[] id;
-    public Vector3f[] position;
-    public Vector3f[] speed;
+    public ArrayList<Mob> mobs = new ArrayList<>();
 
     public MessageMob() {
         super(false);

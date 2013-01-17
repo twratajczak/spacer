@@ -1,5 +1,6 @@
 package spacers;
 
+import com.jme3.math.Vector3f;
 import spacers.message.MessageMob;
 import spacers.message.MessageWelcome;
 import com.jme3.network.AbstractMessage;
@@ -27,6 +28,7 @@ public class Spacers {
     public static final int VERSION = 1;
     public static final int PORT = 8452;
     public static final int UDP_PORT = 8452;
+    public static final int TICKS = 12;
 
     public static void initializeClasses() {
         // Doing it here means that the client code only needs to
@@ -34,6 +36,7 @@ public class Spacers {
         Serializer.registerClass(MessageWelcome.class);
         Serializer.registerClass(MessageMob.class);
         Serializer.registerClass(MessagePlayerSpeed.class);
+        Serializer.registerClass(Mob.class);
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -44,13 +47,11 @@ public class Spacers {
         server.start();
 
         server.addMessageListener(new MessageListener<HostedConnection>() {
-
             @Override
             public void messageReceived(HostedConnection source, Message m) {
                 MessagePlayerSpeed p = (MessagePlayerSpeed) m;
                 owners.get(source.getId()).speed = p.speed;
             }
-
         }, MessagePlayerSpeed.class);
         server.addConnectionListener(new ConHandler());
 
@@ -59,17 +60,18 @@ public class Spacers {
             public void run() {
                 ServerMob.tick();
             }
-        }, 0, 1000 / 12);
+        }, 0, 1000 / TICKS);
 
         new Timer().scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 server.broadcast(ServerMob.toMessage());
             }
-        }, 0, 50);
+        }, 0, 100);
 
-        for (int i = 0; i < 10; ++i)
-            ServerMob.create();
+        for (int i = 0; i < 10; ++i) {
+            ServerMob.create(Mob.Type.CHECKPOINT).position = new Vector3f((float) Math.random(), (float) Math.random(), (float) Math.random());
+        }
     }
     private static Map<Integer, Mob> owners = new TreeMap<Integer, Mob>();
 
@@ -77,7 +79,7 @@ public class Spacers {
 
         @Override
         public void connectionAdded(Server server, HostedConnection conn) {
-            ServerMob m = ServerMob.create();
+            ServerMob m = ServerMob.create(Mob.Type.PLAYER);
             owners.put(conn.getId(), m);
             conn.send(ServerMob.toMessage().setReliable(true));
             conn.send(new MessageWelcome(m.id).setReliable(true));
