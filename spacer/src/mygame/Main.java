@@ -16,6 +16,7 @@ import com.jme3.renderer.RenderManager;
 import java.io.IOException;
 import java.util.Date;
 import spacers.Spacers;
+import spacers.camera.NoKeyPressChaseCamera;
 import spacers.message.MessageMob;
 import spacers.message.MessagePlayerSpeed;
 import spacers.message.MessageWelcome;
@@ -51,7 +52,7 @@ public class Main extends SimpleApplication {
                 public void messageReceived(Client source, Message m) {
                     me = ClientMob.mobs.get(((MessageWelcome) m).mob);
                     flyCam.setEnabled(true);
-                    chaseCam = new ChaseCamera(cam, me.geometry, inputManager);
+                    chaseCam = new NoKeyPressChaseCamera(cam, me.geometry, inputManager);
                     chaseCam.setMinDistance(5f);
                     chaseCam.setMaxDistance(10f);
                 }
