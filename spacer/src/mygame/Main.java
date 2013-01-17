@@ -30,6 +30,7 @@ public class Main extends SimpleApplication {
     private Vector3f speed = Vector3f.ZERO;
     private ChaseCamera chaseCam;
     private static final float SLOWDOWN = 0.99f;
+    private static final float MAXSPEED = 3.0f;
     private Geometry goal;
 
     /**
@@ -102,13 +103,21 @@ public class Main extends SimpleApplication {
         inputManager.addMapping("Strife right", new KeyTrigger(KeyInput.KEY_D));
         AnalogListener analogListener = new AnalogListener() {
             public void onAnalog(String name, float value, float tpf) {
-
-                if (name.equals("Speed up")) {
-                    speed.set(speed.add(getCamera().getDirection().mult(value)));
+               
+                if(name.equals("Speed up")) {
+                    Vector3f direction = getCamera().getDirection();
+                    
+                    speed.setX(Math.min(MAXSPEED, speed.x+direction.x*value));
+                    speed.setY(Math.min(MAXSPEED, speed.y+direction.y*value));
+                    speed.setZ(Math.min(MAXSPEED, speed.z+direction.z*value));
                 }
-
-                if (name.equals("Slow down")) {
-                    speed.set(speed.subtract(getCamera().getDirection().mult(value)));
+                
+                if(name.equals("Slow down")) {
+                    Vector3f direction = getCamera().getDirection();
+                    
+                    speed.setX(Math.max(-MAXSPEED, speed.x-direction.x*value));
+                    speed.setY(Math.max(-MAXSPEED, speed.y-direction.y*value));
+                    speed.setZ(Math.max(-MAXSPEED, speed.z-direction.z*value));
                 }
 
             }
