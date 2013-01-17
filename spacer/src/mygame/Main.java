@@ -1,6 +1,10 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.KeyInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
@@ -20,6 +24,7 @@ public class Main extends SimpleApplication {
 
     public static ClientMob me;
     private static Client client;
+    private Vector3f speed = Vector3f.ZERO;
 
     public static void main(String[] args) throws IOException {
         Spacers.initializeClasses();
@@ -55,7 +60,25 @@ public class Main extends SimpleApplication {
                 rootNode.attachChild(m.geometry);
             }
         };
-
+        
+        inputManager.addMapping("Speed up", new KeyTrigger(KeyInput.KEY_W));
+        inputManager.addMapping("Slow down", new KeyTrigger(KeyInput.KEY_S));
+        inputManager.addMapping("Strife left", new KeyTrigger(KeyInput.KEY_A));
+        inputManager.addMapping("Strife right", new KeyTrigger(KeyInput.KEY_D));
+        AnalogListener analogListener = new AnalogListener() {
+            public void onAnalog(String name, float value, float tpf) {
+               
+                if(name.equals("Speed up")) {
+                    speed.z+=value;
+                }
+                
+                if(name.equals("Slow down")) {
+                    speed.z-=value;
+                }
+            }
+          };
+        
+        inputManager.addListener(analogListener, new String[]{"Speed up", "Slow down"});
         client.start();
     }
 
@@ -63,7 +86,8 @@ public class Main extends SimpleApplication {
     public void simpleUpdate(float tpf) {
         final float t = (new Date().getTime() - ClientMob.ts) / (1000.f / Spacers.TICKS);
 
-        Vector3f speed = new Vector3f(0, 0, 0.2f);
+        
+        
         client.send(new MessagePlayerSpeed(speed));
 
         final Vector3f p = me.position.add(speed.mult(t));
