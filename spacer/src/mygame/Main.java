@@ -3,7 +3,6 @@ package mygame;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
-import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
@@ -110,8 +109,6 @@ public class Main extends SimpleApplication {
         client.send(new MessagePlayerSpeed(speed));
 
         final Vector3f p = me.position.add(speed.mult(t));
-       // getCamera().lookAt(p, new Vector3f(0.f, 1.f, 0.f));
-       //getCamera().setLocation(p.add(new Vector3f(0, 0, -10f)));
 
         for (ClientMob c : ClientMob.mobs) {
             c.geometry.setLocalTranslation(c.position.add(c.speed.mult(t)));
