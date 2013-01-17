@@ -1,6 +1,7 @@
 package mygame;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
@@ -25,26 +26,39 @@ public class Main extends SimpleApplication {
     public static ClientMob me;
     private static Client client;
     private Vector3f speed = Vector3f.ZERO;
-
-    public static void main(String[] args) throws IOException {
+    private ChaseCamera chaseCam;
+    private static final float SLOWDOWN = 0.99f;
+    
+    /**
+     *
+     * @param args
+     */
+    public static void main(String[] args) {
         Spacers.initializeClasses();
 
         Main app = new Main();
-
-        client = Network.connectToServer(Spacers.NAME, Spacers.VERSION,
-                Spacers.HOST, Spacers.PORT, Spacers.UDP_PORT);
-        client.addMessageListener(new ChatHandler(), MessageMob.class);
-        client.addMessageListener(new MessageListener<Client>() {
-            public void messageReceived(Client source, Message m) {
-                me = ClientMob.mobs.get(((MessageWelcome) m).mob);
-            }
-        }, MessageWelcome.class);
-
         app.start();
     }
 
     @Override
     public void simpleInitApp() {
+        
+        try{
+            client = Network.connectToServer(Spacers.NAME, Spacers.VERSION,
+                    Spacers.HOST, Spacers.PORT, Spacers.UDP_PORT);
+            client.addMessageListener(new ChatHandler(), MessageMob.class);
+            client.addMessageListener(new MessageListener<Client>() {
+                public void messageReceived(Client source, Message m) {
+                    me = ClientMob.mobs.get(((MessageWelcome) m).mob);
+                    flyCam.setEnabled(true);
+                    chaseCam = new ChaseCamera(cam, me.geometry, inputManager);
+                    chaseCam.setMinDistance(5f);
+                    chaseCam.setMaxDistance(10f);
+                }
+            }, MessageWelcome.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         ClientMob.callback = new ClientMob.MobInterface() {
             public void onCreate(ClientMob m) {
                 Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
@@ -57,9 +71,12 @@ public class Main extends SimpleApplication {
                         break;
                 }
                 m.geometry.setMaterial(mat);
-                rootNode.attachChild(m.geometry);
+                rootNode.attachChild(m.geometry);         
+
             }
         };
+        
+        client.start();
         
         inputManager.addMapping("Speed up", new KeyTrigger(KeyInput.KEY_W));
         inputManager.addMapping("Slow down", new KeyTrigger(KeyInput.KEY_S));
@@ -69,30 +86,32 @@ public class Main extends SimpleApplication {
             public void onAnalog(String name, float value, float tpf) {
                
                 if(name.equals("Speed up")) {
-                    speed.z+=value;
+                    speed.set(speed.add(getCamera().getDirection().mult(value)));
                 }
                 
                 if(name.equals("Slow down")) {
-                    speed.z-=value;
+                    speed.set(speed.subtract(getCamera().getDirection().mult(value)));
                 }
+              
             }
           };
         
         inputManager.addListener(analogListener, new String[]{"Speed up", "Slow down"});
-        client.start();
+        
+        
     }
 
     @Override
     public void simpleUpdate(float tpf) {
         final float t = (new Date().getTime() - ClientMob.ts) / (1000.f / Spacers.TICKS);
-
-        
+     
+        speed.set(speed.mult(SLOWDOWN));
         
         client.send(new MessagePlayerSpeed(speed));
 
         final Vector3f p = me.position.add(speed.mult(t));
-        getCamera().lookAt(p, new Vector3f(0.f, 1.f, 0.f));
-        getCamera().setLocation(p.add(new Vector3f(0, 0, -10f)));
+       // getCamera().lookAt(p, new Vector3f(0.f, 1.f, 0.f));
+       //getCamera().setLocation(p.add(new Vector3f(0, 0, -10f)));
 
         for (ClientMob c : ClientMob.mobs) {
             c.geometry.setLocalTranslation(c.position.add(c.speed.mult(t)));
@@ -110,6 +129,10 @@ public class Main extends SimpleApplication {
             MessageMob chat = (MessageMob) m;
             ClientMob.fromMessage(chat);
         }
+    }
+    
+    public final void initializeCamera() {
+        chaseCam = new ChaseCamera(cam, me.geometry, inputManager);
     }
 
     @Override

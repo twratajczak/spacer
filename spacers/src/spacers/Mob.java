@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Serializable
-public class Mob {
+public class Mob  {
 
     public static enum Type {
 
