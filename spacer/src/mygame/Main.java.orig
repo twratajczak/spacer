@@ -1,5 +1,6 @@
 package mygame;
 
+import mygame.camera.NoKeyPressChaseCamera;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.ChaseCamera;
 import com.jme3.input.KeyInput;
@@ -18,8 +19,11 @@ import com.jme3.scene.shape.Sphere;
 import java.io.IOException;
 import java.util.Date;
 import spacers.Spacers;
+<<<<<<< HEAD
 import spacers.message.MessageGoal;
-import mygame.camera.NoKeyPressChaseCamera;
+import spacers.camera.NoKeyPressChaseCamera;
+=======
+>>>>>>> No key pressed chase camera, refactor
 import spacers.message.MessageMob;
 import spacers.message.MessagePlayerSpeed;
 import spacers.message.MessageWelcome;
