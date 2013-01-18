@@ -1,49 +1,51 @@
 package spacers;
 
-import spacers.message.MessageMob;
-import com.jme3.math.Vector3f;
-import com.jme3.network.HostedConnection;
 import java.util.ArrayList;
 import java.util.List;
+
 import spacers.message.MessageGoal;
+import spacers.message.MessageMob;
+
+import com.jme3.network.HostedConnection;
 
 public class ServerMob extends Mob {
-    public HostedConnection conn;
-    public ServerMob goal;
+	public HostedConnection conn;
+	public ServerMob goal;
 
-    public ServerMob(int id, Type type) {
-        super(id);
-        this.type = type;
-    }
-    public static final List<ServerMob> mobs = new ArrayList<>();
+	public ServerMob(final int id, final Type type) {
+		super(id);
+		this.type = type;
+	}
 
-    public static ServerMob create(Mob.Type type) {
-        ServerMob result = new ServerMob(mobs.size(), type);
-        mobs.add(result);
-        return result;
-    }
+	public static final List<ServerMob> mobs = new ArrayList<>();
 
-    private void _tick() {
-        position = position.add(speed);
+	public static ServerMob create(final Mob.Type type) {
+		final ServerMob result = new ServerMob(mobs.size(), type);
+		mobs.add(result);
+		return result;
+	}
 
-        if (null != goal && goal.position.distance(position) < 0.1) {
-            ServerMob next = mobs.get(1 + goal.id);
-            if (Mob.Type.CHECKPOINT == next.type) {
-                goal = next;
-                conn.send(new MessageGoal(goal));
-            }
-        }
-    }
+	private void _tick() {
+		position = position.add(speed);
 
-    public static void tick() {
-        for (ServerMob m : mobs)
-            m._tick();
-    }
+		if (null != goal && goal.position.distance(position) < 0.1) {
+			final ServerMob next = mobs.get(1 + goal.id);
+			if (Mob.Type.CHECKPOINT == next.type) {
+				goal = next;
+				conn.send(new MessageGoal(goal));
+			}
+		}
+	}
 
-    public static MessageMob toMessage() {
-        MessageMob result = new MessageMob();
-        for (ServerMob m : mobs)
-            result.mobs.add(new Mob(m));
-        return result;
-    }
+	public static void tick() {
+		for (final ServerMob m : mobs)
+			m._tick();
+	}
+
+	public static MessageMob toMessage() {
+		final MessageMob result = new MessageMob();
+		for (final ServerMob m : mobs)
+			result.mobs.add(new Mob(m));
+		return result;
+	}
 }

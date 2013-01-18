@@ -1,18 +1,18 @@
 package spacers.message;
 
-import com.jme3.network.AbstractMessage;
-import com.jme3.network.serializing.Serializable;
 import spacers.ServerMob;
 
+import com.jme3.network.AbstractMessage;
+import com.jme3.network.serializing.Serializable;
 
 @Serializable
 public class MessageGoal extends AbstractMessage {
-    public int mob;
+	public int mob;
 
-    public MessageGoal() {
-    }
+	public MessageGoal() {
+	}
 
-    public MessageGoal(ServerMob mob) {
-        this.mob = mob.id;
-    }
+	public MessageGoal(final ServerMob mob) {
+		this.mob = mob.id;
+	}
 }

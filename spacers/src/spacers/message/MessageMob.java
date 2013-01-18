@@ -1,17 +1,18 @@
 package spacers.message;
 
-import com.jme3.network.AbstractMessage;
-import com.jme3.network.serializing.Serializable;
 import java.util.ArrayList;
+
 import spacers.Mob;
 
+import com.jme3.network.AbstractMessage;
+import com.jme3.network.serializing.Serializable;
 
 @Serializable
 public class MessageMob extends AbstractMessage {
-    public ArrayList<Mob> mobs = new ArrayList<>();
+	public ArrayList<Mob> mobs = new ArrayList<>();
 
-    public MessageMob() {
-        super(false);
-    }
+	public MessageMob() {
+		super(false);
+	}
 
 }

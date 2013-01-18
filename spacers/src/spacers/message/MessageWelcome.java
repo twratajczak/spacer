@@ -5,12 +5,12 @@ import com.jme3.network.serializing.Serializable;
 
 @Serializable
 public class MessageWelcome extends AbstractMessage {
-    public int mob;
+	public int mob;
 
-    public MessageWelcome() {
-    }
+	public MessageWelcome() {
+	}
 
-    public MessageWelcome(int mob) {
-        this.mob = mob;
-    }
+	public MessageWelcome(final int mob) {
+		this.mob = mob;
+	}
 }
