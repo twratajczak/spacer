@@ -1,5 +1,4 @@
 *.log
 *.so
-build/
-dist/
-private/
+bin
+.metadata
