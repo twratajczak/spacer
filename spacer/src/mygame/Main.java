@@ -12,12 +12,8 @@ import spacers.message.MessageWelcome;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.ChaseCamera;
-import com.jme3.input.KeyInput;
-import com.jme3.input.controls.AnalogListener;
-import com.jme3.input.controls.KeyTrigger;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
@@ -28,15 +24,16 @@ import com.jme3.scene.shape.Sphere;
 import com.jme3.texture.Texture;
 import com.jme3.util.SkyFactory;
 
+import controller.PlayerControl;
+
 public class Main extends SimpleApplication {
 
 	public static ClientMob me;
 	private static Client client;
-	private final Vector3f speed = Vector3f.ZERO;
 	private ChaseCamera chaseCam;
-	private static final float SLOWDOWN = 0.99f;
-	private static final float MAXSPEED = 3.0f;
 	private Geometry goal;
+
+	private PlayerControl playerControl;
 
 	/**
 	 * 
@@ -101,36 +98,10 @@ public class Main extends SimpleApplication {
 			}
 		};
 
+		playerControl = new PlayerControl(inputManager, getCamera());
+		playerControl.setupControls();
+
 		client.start();
-
-		inputManager.addMapping("Speed up", new KeyTrigger(KeyInput.KEY_W));
-		inputManager.addMapping("Slow down", new KeyTrigger(KeyInput.KEY_S));
-		inputManager.addMapping("Strife left", new KeyTrigger(KeyInput.KEY_A));
-		inputManager.addMapping("Strife right", new KeyTrigger(KeyInput.KEY_D));
-		final AnalogListener analogListener = new AnalogListener() {
-			@Override
-			public void onAnalog(final String name, final float value, final float tpf) {
-
-				if (name.equals("Speed up")) {
-					final Vector3f direction = getCamera().getDirection();
-
-					speed.setX(Math.min(MAXSPEED, speed.x + direction.x * value));
-					speed.setY(Math.min(MAXSPEED, speed.y + direction.y * value));
-					speed.setZ(Math.min(MAXSPEED, speed.z + direction.z * value));
-				}
-
-				if (name.equals("Slow down")) {
-					final Vector3f direction = getCamera().getDirection();
-
-					speed.setX(Math.max(-MAXSPEED, speed.x - direction.x * value));
-					speed.setY(Math.max(-MAXSPEED, speed.y - direction.y * value));
-					speed.setZ(Math.max(-MAXSPEED, speed.z - direction.z * value));
-				}
-
-			}
-		};
-
-		inputManager.addListener(analogListener, new String[] { "Speed up", "Slow down" });
 
 		{
 			final Texture west = assetManager.loadTexture("Textures/Sky/Space/space_west.png");
@@ -147,9 +118,9 @@ public class Main extends SimpleApplication {
 	public void simpleUpdate(final float tpf) {
 		final float t = (new Date().getTime() - ClientMob.ts) / (1000.f / Spacers.TICKS);
 
-		speed.set(speed.mult(SLOWDOWN));
+		playerControl.update();
 
-		client.send(new MessagePlayerSpeed(speed));
+		client.send(new MessagePlayerSpeed(playerControl.getSpeed()));
 
 		for (final ClientMob c : ClientMob.mobs)
 			c.geometry.setLocalTranslation(c.position.add(c.speed.mult(t)));
