@@ -25,6 +25,8 @@ import com.jme3.network.Network;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Sphere;
+import com.jme3.texture.Texture;
+import com.jme3.util.SkyFactory;
 
 public class Main extends SimpleApplication {
 
@@ -130,6 +132,15 @@ public class Main extends SimpleApplication {
 
 		inputManager.addListener(analogListener, new String[] { "Speed up", "Slow down" });
 
+		{
+			final Texture west = assetManager.loadTexture("Textures/Sky/Space/space_west.png");
+			final Texture east = assetManager.loadTexture("Textures/Sky/Space/space_east.png");
+			final Texture north = assetManager.loadTexture("Textures/Sky/Space/space_north.png");
+			final Texture south = assetManager.loadTexture("Textures/Sky/Space/space_south.png");
+			final Texture up = assetManager.loadTexture("Textures/Sky/Space/space_up.png");
+			final Texture down = assetManager.loadTexture("Textures/Sky/Space/space_down.png");
+			rootNode.attachChild(SkyFactory.createSky(assetManager, west, east, north, south, up, down));
+		}
 	}
 
 	@Override
