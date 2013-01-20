@@ -1,9 +1,9 @@
 package mygame;
 
 import java.io.IOException;
-import java.util.Date;
 
 import mygame.camera.NoKeyPressChaseCamera;
+import spacers.Mob;
 import spacers.Spacers;
 import spacers.message.MessageGoal;
 import spacers.message.MessageMob;
@@ -85,18 +85,10 @@ public class Main extends SimpleApplication {
 		}
 		ClientMob.callback = new ClientMob.MobInterface() {
 			@Override
-			public void onCreate(final ClientMob m) {
-				final Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-				switch (m.type) {
-				case CHECKPOINT:
-					mat.setColor("Color", ColorRGBA.Blue);
-					break;
-				case PLAYER:
-					mat.setColor("Color", ColorRGBA.Red);
-					break;
-				}
-				m.geometry.setMaterial(mat);
-				rootNode.attachChild(m.geometry);
+			public ClientMob onCreate(final Mob m) {
+				final ClientMob c = new ClientMob(m, assetManager);
+				rootNode.attachChild(c.geometry);
+				return c;
 
 			}
 		};
@@ -145,14 +137,11 @@ public class Main extends SimpleApplication {
 
 	@Override
 	public void simpleUpdate(final float tpf) {
-		final float t = (new Date().getTime() - ClientMob.ts) / (1000.f / Spacers.TICKS);
-
 		speed.set(speed.mult(SLOWDOWN));
 
 		client.send(new MessagePlayerSpeed(speed));
 
-		for (final ClientMob c : ClientMob.mobs)
-			c.geometry.setLocalTranslation(c.position.add(c.speed.mult(t)));
+		ClientMob.update();
 	}
 
 	@Override
